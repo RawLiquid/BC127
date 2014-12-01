@@ -1,11 +1,4 @@
 
-/***
- * 
- * Bluecreations BC127 module library for arduino
- *
- *
- ***/
-
 #ifndef BC127_
 #define BC127_
     
