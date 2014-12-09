@@ -3,11 +3,17 @@
 
 #define DEBUG
 
+
+BC127::BC127(HardwareSerial * ser) {
+
+    _serial = ser;
+
+}
+
 BC127::BC127(void (*btstartedFunction)(),
 			 void (*connectedFunction)(long long),
 			 void (*disconnectedFunction)(long long),
 			 void (*availibleFunction)(long long,int,char *)) {
-
 	btStartFunction = btstartedFunction;
 	btConnectedFunction = connectedFunction;
 	btDisconnectedFunction = disconnectedFunction;
@@ -18,16 +24,20 @@ BC127::BC127(void (*btstartedFunction)(),
 void BC127::init() {
 
     // COM.begin(38400);
-    COM.begin(9600);
+    // COM.begin(9600);
+    // _serial->begin(9600);
+    _serial->begin(38400);
 
-	addQueue(BT_RESET);
+	// addQueue(BT_RESET);
     
-    addQueue(BT_SET_ROLE,0,0);
-    addQueue(BT_SET_AUDIO,0);
-    addQueue(BT_GET_MIC_STATE);
-    addQueue(BT_SET_GAIN,15);
-    addQueue(BT_GET_VOLUME);
-    addQueue(BT_SET_VOLUME,15);
+    addQueue(BT_GET_CONFIG,CFG_BAUD);
+    
+    // addQueue(BT_SET_ROLE,0,0);
+    // addQueue(BT_SET_AUDIO,0);
+    // addQueue(BT_GET_MIC_STATE);
+    // addQueue(BT_SET_GAIN,15);
+    // addQueue(BT_GET_VOLUME);
+    // addQueue(BT_SET_VOLUME,15);
     
     initTime = millis();
     bootDelayed = false;
@@ -110,6 +120,50 @@ void BC127::handleMessage() {
         phoneState = PHONE_IDLE;
     
     } else if(strMatch(messageArray,"CALL")==0)           callMsg();
+    else if(strMatch(messageArray,"BATTERY_STATUS")==0) batteryMsg();
+    else {
+    
+        int cfg = isConfig(messageArray);
+
+        if(cfg != -1) {
+        
+            char dataStr[50];
+
+            // loop that searches for '=' sign
+            for(int i=0;messageArray[i]!=0;i++) {
+                
+                if(messageArray[i] == '=') {
+                    
+                    i++;
+            
+                    int count = 0;
+                    for(;messageArray[i]!=0;i++) {
+                    
+                        dataStr[count++] = messageArray[i];
+                    
+                    }
+                    
+                    dataStr[count++] = 0;
+                    
+                    break;
+                    
+                }
+            
+            }
+            
+            configResult(cfg,dataStr);
+        
+        }
+    
+    }
+    
+}
+
+int BC127::isConfig(char * inStr) {
+
+    for(int i=0;i<CFG_TOTAL;i++) if(strMatch(inStr,configNames[i]) == 0) return i;
+    
+    return -1;
     
 }
 
@@ -359,7 +413,10 @@ void BC127::callMsg() {
     
 }
 
+void BC127::batteryMsg() {
 
+
+}
 
 
 
@@ -668,12 +725,86 @@ void BC127::btSend(byte * arrayToSend,uint16_t length) {
 
 #ifdef DEBUG
     Serial.print("btSend ");
-    for(int i=0;i<length;i++) Serial.write(arrayToSend[i]);
+    for(int i=0;i<length;i++) Serial.printf("%02X ",arrayToSend[i]);
     Serial.println();
 #endif
 
     for(int i=0;i<length;i++) COM.write(arrayToSend[i]);
     
+}
+
+void BC127::getConfig(int configValue) {
+
+    const int TSTR_MAX = 75;
+    char str[TSTR_MAX];
+    
+    int len = snprintf(str,TSTR_MAX,"GET %s\r",configNames[configValue%CFG_TOTAL]);
+
+    btSend((byte*)str,len);
+    
+}
+
+void BC127::configResult(int index,char * dataStr) {
+
+    #ifdef DEBUG
+    
+        Serial.printf("configResult %s recieved with data %s\r\n",configNames[index],dataStr);
+    
+    #endif
+    
+    switch(index) {
+    
+        case CFG_AUDIO               : break; 
+        case CFG_AUTOCONN            : break; 
+        case CFG_BATT_THRESH         : break; 
+        case CFG_BAUD                : break; 
+        case CFG_BLE_ROLE            : break; 
+        case CFG_BPS                 : break; 
+        case CFG_CLASSIC_ROLE        : break; 
+        case CFG_CMD_TO              : break; 
+        case CFG_COD                 : break; 
+        case CFG_CODEC               : break; 
+        case CFG_DEEP_SLEEP          : break;
+        case CFG_DEVICE_ID           : break;
+        case CFG_DISCOVERABLE        : break;
+        case CFG_ENABLE_A2DP         : break;
+        case CFG_ENABLE_ANDROID_BLE  : break;
+        case CFG_ENABLE_AVRCP        : break;
+        case CFG_ENABLE_BATTERY_IND  : break;
+        case CFG_ENABLE_HFP          : break;
+        case CFG_ENABLE_HFP_CVC      : break;
+        case CFG_ENABLE_HFP_NREC     : break;
+        case CFG_ENABLE_HFP_WBS      : break;
+        case CFG_ENABLE_LED          : break;
+        case CFG_ENABLE_MAP          : break;
+        case CFG_ENABLE_PBAP         : break;
+        case CFG_ENABLE_SPP          : break;
+        case CFG_ENABLE_SPP_SNIFF    : break;
+        case CFG_FLOW_CTRL           : break;
+        case CFG_FORCE_ANALOG_MIC    : break;
+        case CFG_GPIOCONTROL         : break;
+        case CFG_I2S                 : break;
+        case CFG_INPUT_GAIN          : break;
+        case CFG_LOCAL_ADDR          : break;
+        case CFG_MAX_REC             : break;
+        case CFG_MUSIC_META_DATA     : break;
+        case CFG_NAME                : break;
+        case CFG_NAME_SHORT          : break;
+        case CFG_PARITY              : break;
+        case CFG_PIN                 : break;
+        case CFG_REMOTE_ADDR         : break;
+        case CFG_RSSI_THRESH         : break;
+        case CFG_SPP_TRANSPARENT     : break;
+        case CFG_UUID_DATA           : break;
+        case CFG_UUID_SPP            : break;
+        case CFG_UUID_SRV            : break;
+    
+    }
+
+}
+
+void BC127::setConfig() {
+
 }
 
 void BC127::run(int function) {
@@ -691,8 +822,10 @@ void BC127::run(int function) {
     char str[TSTR_MAX];
     
     long long temp = 0;
-
+    
 	switch (function) {
+        case BT_GET_BATTERY:    btSend("BATTERY_STATUS\r"); break;
+        case BT_GET_CONFIG:     getConfig(bufAry[0]); break;
 		case BT_RESET:          btSend("RESET\r"); break;
 		case BT_SET_POWER:      sttm "POWER %s\r", (bufAry[0] == ON ? "ON" : "OFF") ); break;
 		case BT_INQUIRY:        sttm "INQUIRY %d\r",bufAry[0]);                                 btSend(str); break;
@@ -967,7 +1100,7 @@ bool BC127::isDigit(char character) {
 
 }
 
-int BC127::strMatch(char* mystring,char* searchstring) {
+int BC127::strMatch(char* mystring,const char* searchstring) {
 
 	int mystringLen = strLength(mystring);
 	int searchstringLen = strLength(searchstring);
@@ -993,7 +1126,7 @@ int BC127::strMatch(char* mystring,char* searchstring) {
 
 }
 
-int BC127::strLength(char* string) {
+int BC127::strLength(const char* string) {
   
 	int count = 0;
 	

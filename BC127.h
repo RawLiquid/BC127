@@ -3,7 +3,9 @@
 #define BC127_
     
     #include "Arduino.h"
+    // #include <HardwareSerial.h>
     #include <SdFat.h>
+    #include <Stream.h>
 
     #define ON 		1
     #define OFF 	0
@@ -34,6 +36,109 @@
     #define PHONE_RINGING           3
     
     #define COM Serial2
+    
+    // typedef const int8_t config_t;
+
+    // class BC127;
+
+
+    int const
+
+    CFG_AUDIO               =  0, 
+    CFG_AUTOCONN            =  1, 
+    CFG_BATT_THRESH         =  2, 
+    CFG_BAUD                =  3, 
+    CFG_BLE_ROLE            =  4, 
+    CFG_BPS                 =  5, 
+    CFG_CLASSIC_ROLE        =  6, 
+    CFG_CMD_TO              =  7, 
+    CFG_COD                 =  8, 
+    CFG_CODEC               =  9, 
+    CFG_DEEP_SLEEP          = 10,
+    CFG_DEVICE_ID           = 11,
+    CFG_DISCOVERABLE        = 12,
+    CFG_ENABLE_A2DP         = 13,
+    CFG_ENABLE_ANDROID_BLE  = 14,
+    CFG_ENABLE_AVRCP        = 15,
+    CFG_ENABLE_BATTERY_IND  = 16,
+    CFG_ENABLE_HFP          = 17,
+    CFG_ENABLE_HFP_CVC      = 18,
+    CFG_ENABLE_HFP_NREC     = 19,
+    CFG_ENABLE_HFP_WBS      = 20,
+    CFG_ENABLE_LED          = 21,
+    CFG_ENABLE_MAP          = 22,
+    CFG_ENABLE_PBAP         = 23,
+    CFG_ENABLE_SPP          = 24,
+    CFG_ENABLE_SPP_SNIFF    = 25,
+    CFG_FLOW_CTRL           = 26,
+    CFG_FORCE_ANALOG_MIC    = 27,
+    CFG_GPIOCONTROL         = 28,
+    CFG_I2S                 = 29,
+    CFG_INPUT_GAIN          = 30,
+    CFG_LOCAL_ADDR          = 31,
+    CFG_MAX_REC             = 32,
+    CFG_MUSIC_META_DATA     = 33,
+    CFG_NAME                = 34,
+    CFG_NAME_SHORT          = 35,
+    CFG_PARITY              = 36,
+    CFG_PIN                 = 37,
+    CFG_REMOTE_ADDR         = 38,
+    CFG_RSSI_THRESH         = 39,
+    CFG_SPP_TRANSPARENT     = 40,
+    CFG_UUID_DATA           = 41,
+    CFG_UUID_SPP            = 42,
+    CFG_UUID_SRV            = 43,
+
+    CFG_TOTAL               = 44;
+
+    const char configNames[CFG_TOTAL][25] {
+
+        "AUDIO",
+        "AUTOCONN",
+        "BATT_THRESH",
+        "BAUD",
+        "BLE_ROLE",
+        "BPS",
+        "CLASSIC_ROLE",
+        "CMD_TO ",
+        "COD",
+        "CODEC",
+        "DEEP_SLEEP",
+        "DEVICE_ID",
+        "DISCOVERABLE",
+        "ENABLE_A2DP ",
+        "ENABLE_ANDROID_BLE",
+        "ENABLE_AVRCP",
+        "ENABLE_BATTERY_IND",
+        "ENABLE_HFP",
+        "ENABLE_HFP_CVC",
+        "ENABLE_HFP_NREC",
+        "ENABLE_HFP_WBS",
+        "ENABLE_LED",
+        "ENABLE_MAP",
+        "ENABLE_PBAP",
+        "ENABLE_SPP ",
+        "ENABLE_SPP_SNIFF",
+        "FLOW_CTRL",
+        "FORCE_ANALOG_MIC",
+        "GPIOCONTROL",
+        "I2S",
+        "INPUT_GAIN",
+        "LOCAL_ADDR",
+        "MAX_REC",
+        "MUSIC_META_DATA",
+        "NAME",
+        "NAME_SHORT",
+        "PARITY",
+        "PIN",
+        "REMOTE_ADDR",
+        "RSSI_THRESH",
+        "SPP_TRANSPARENT",
+        "UUID_DATA",
+        "UUID_SPP",
+        "UUID_SRV"
+
+    };
 
     const int RX_MESSAGE_MAX = 100;
 
@@ -64,7 +169,8 @@
     const int BT_REJECT_CALL    = 21;
     const int BT_ANSWER_CALL    = 22;
     const int BT_SET_POWER      = 23;
-
+    const int BT_GET_CONFIG     = 24;
+    const int BT_GET_BATTERY    = 25;
 
     const char btfunctions[30][20] = {
 
@@ -91,27 +197,33 @@
         "BT_END_CALL",
         "BT_REJECT_CALL",
         "BT_ANSWER_CALL",
-        "BT_SET_POWER"
+        "BT_SET_POWER",
+        "BT_GET_CONFIG",
+        "BT_GET_BATTERY"
     
     };
     
     class BC127 {
-
+    
         // friend class BC127device;
 
         public:
+         
+            HardwareSerial * _serial;
         
+            BC127(HardwareSerial * ser);
+            
+            BC127(void (*btstartedFunction)(),
+                  void (*connectedFunction)(long long),
+                  void (*disconnectedFunction)(long long),
+                  void (*availibleFunction)(long long,int,char *));
+
             int currentDeviceIndex = -1;
             int phoneState = PHONE_IDLE;
             char phoneNumber[15] {0};
             
             // Functions
         
-            BC127(void (*btstartedFunction)(),
-                  void (*connectedFunction)(long long),
-                  void (*disconnectedFunction)(long long),
-                  void (*availibleFunction)(long long,int,char *));
-                  
             void init();
             void loop();
             void power(bool state);
@@ -129,6 +241,10 @@
             void connectPaired(int pairedIndex);
             void connectAvailible(int availibleIndex);
             void audioTransfer();
+            void getBaud() { addQueue(BT_GET_CONFIG,CFG_BAUD); }
+            void getBattery() { addQueue(BT_GET_BATTERY); }
+            
+
             
             void sayHello();
             
@@ -138,6 +254,13 @@
 
         private:
         
+            int isConfig(char * inStr);
+
+            void getConfig(int configValue);
+            void setConfig();
+
+            void configResult(int index,char * data);
+            
             // Variables
         
             const bool D = true;
@@ -172,7 +295,7 @@
             void (*btDisconnectedFunction)(long long);
             void (*btAvailibleFunction)(long long,int,char *);
             
-            // Functions
+            // Functions 
             
             void run(int function);
             
@@ -197,8 +320,8 @@
             bool stringtoint(char* string,int strt,int ending,int &returnValue);
             bool isDigit(char character);
             
-            int strMatch(char* mystring,char* searchstring);
-            int strLength(char* string);
+            int strMatch(char* mystring,const char* searchstring);
+            int strLength(const char* string);
             long long stringToHexAuto(char *string,int strt);
             byte asciitohexnibble(char value);
             bool asciiIsHex(char value);
@@ -217,6 +340,7 @@
             void melodyVersionMsg();            
             void ringMsg(); 
             void callMsg(); 
+            void batteryMsg();
 
 
     };
