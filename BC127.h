@@ -7,33 +7,33 @@
     #include <SdFat.h>
     #include <Stream.h>
 
-    #define ON 		1
-    #define OFF 	0
+    #define ON                  1
+    #define OFF                 0
 
     #define DEBUG DEBUG
 
-    #define BT_MAX_AVAILIBLE 	20
-    #define BT_MAX_PAIRED 		20
+    #define BT_MAX_AVAILIBLE    20
+    #define BT_MAX_PAIRED       20
 
-    #define SINK 	0
-    #define SOURCE 	1
+    #define SINK                0
+    #define SOURCE              1
 
-    #define SINGLE 			0
-    #define MULTIPOINT 		1
-    #define TWS 			2
+    #define SINGLE              0
+    #define MULTIPOINT          1
+    #define TWS                 2
 
-    #define MELODY_5_0		0
-    #define MELODY_5_2		1
-    #define MELODY_5_5		2
+    #define MELODY_5_0          0
+    #define MELODY_5_2          1
+    #define MELODY_5_5          2
 
-    #define FULL_ADDRESS	0
-    #define PAIR_INDEX		1
-    #define AVAILIBLE_INDEX	2
+    #define FULL_ADDRESS        0
+    #define PAIR_INDEX          1
+    #define AVAILIBLE_INDEX     2
     
-    #define PHONE_IDLE              0
-    #define PHONE_DIALING           1
-    #define PHONE_IN_CALL           2
-    #define PHONE_RINGING           3
+    #define PHONE_IDLE          0
+    #define PHONE_DIALING       1
+    #define PHONE_IN_CALL       2
+    #define PHONE_RINGING       3
     
     #define COM Serial2
     
@@ -41,168 +41,206 @@
 
     // class BC127;
 
+    namespace CFG {
+    
+        int const
 
-    int const
+        AUDIO               =  0, 
+        AUTOCONN            =  1, 
+        BATT_THRESH         =  2, 
+        BAUD                =  3, 
+        BLE_ROLE            =  4, 
+        BPS                 =  5, 
+        CLASSIC_ROLE        =  6, 
+        CMD_TO              =  7, 
+        COD                 =  8, 
+        CODEC               =  9, 
+        DEEP_SLEEP          = 10,
+        DEVICE_ID           = 11,
+        DISCOVERABLE        = 12,
+        ENABLE_A2DP         = 13,
+        ENABLE_ANDROID_BLE  = 14,
+        ENABLE_AVRCP        = 15,
+        ENABLE_BATTERY_IND  = 16,
+        ENABLE_HFP          = 17,
+        ENABLE_HFP_CVC      = 18,
+        ENABLE_HFP_NREC     = 19,
+        ENABLE_HFP_WBS      = 20,
+        ENABLE_LED          = 21,
+        ENABLE_MAP          = 22,
+        ENABLE_PBAP         = 23,
+        ENABLE_SPP          = 24,
+        ENABLE_SPP_SNIFF    = 25,
+        FLOW_CTRL           = 26,
+        FORCE_ANALOG_MIC    = 27,
+        GPIOCONTROL         = 28,
+        I2S                 = 29,
+        INPUT_GAIN          = 30,
+        LOCAL_ADDR          = 31,
+        MAX_REC             = 32,
+        MUSIC_META_DATA     = 33,
+        NAME                = 34,
+        NAME_SHORT          = 35,
+        PARITY              = 36,
+        PIN                 = 37,
+        REMOTE_ADDR         = 38,
+        RSSI_THRESH         = 39,
+        SPP_TRANSPARENT     = 40,
+        UUID_DATA           = 41,
+        UUID_SPP            = 42,
+        UUID_SRV            = 43,
 
-    CFG_AUDIO               =  0, 
-    CFG_AUTOCONN            =  1, 
-    CFG_BATT_THRESH         =  2, 
-    CFG_BAUD                =  3, 
-    CFG_BLE_ROLE            =  4, 
-    CFG_BPS                 =  5, 
-    CFG_CLASSIC_ROLE        =  6, 
-    CFG_CMD_TO              =  7, 
-    CFG_COD                 =  8, 
-    CFG_CODEC               =  9, 
-    CFG_DEEP_SLEEP          = 10,
-    CFG_DEVICE_ID           = 11,
-    CFG_DISCOVERABLE        = 12,
-    CFG_ENABLE_A2DP         = 13,
-    CFG_ENABLE_ANDROID_BLE  = 14,
-    CFG_ENABLE_AVRCP        = 15,
-    CFG_ENABLE_BATTERY_IND  = 16,
-    CFG_ENABLE_HFP          = 17,
-    CFG_ENABLE_HFP_CVC      = 18,
-    CFG_ENABLE_HFP_NREC     = 19,
-    CFG_ENABLE_HFP_WBS      = 20,
-    CFG_ENABLE_LED          = 21,
-    CFG_ENABLE_MAP          = 22,
-    CFG_ENABLE_PBAP         = 23,
-    CFG_ENABLE_SPP          = 24,
-    CFG_ENABLE_SPP_SNIFF    = 25,
-    CFG_FLOW_CTRL           = 26,
-    CFG_FORCE_ANALOG_MIC    = 27,
-    CFG_GPIOCONTROL         = 28,
-    CFG_I2S                 = 29,
-    CFG_INPUT_GAIN          = 30,
-    CFG_LOCAL_ADDR          = 31,
-    CFG_MAX_REC             = 32,
-    CFG_MUSIC_META_DATA     = 33,
-    CFG_NAME                = 34,
-    CFG_NAME_SHORT          = 35,
-    CFG_PARITY              = 36,
-    CFG_PIN                 = 37,
-    CFG_REMOTE_ADDR         = 38,
-    CFG_RSSI_THRESH         = 39,
-    CFG_SPP_TRANSPARENT     = 40,
-    CFG_UUID_DATA           = 41,
-    CFG_UUID_SPP            = 42,
-    CFG_UUID_SRV            = 43,
+        TOTAL               = 44;
+        
+        const char names[TOTAL][25] {
 
-    CFG_TOTAL               = 44;
+            "AUDIO",
+            "AUTOCONN",
+            "BATT_THRESH",
+            "BAUD",
+            "BLE_ROLE",
+            "BPS",
+            "CLASSIC_ROLE",
+            "CMD_TO ",
+            "COD",
+            "CODEC",
+            "DEEP_SLEEP",
+            "DEVICE_ID",
+            "DISCOVERABLE",
+            "ENABLE_A2DP ",
+            "ENABLE_ANDROID_BLE",
+            "ENABLE_AVRCP",
+            "ENABLE_BATTERY_IND",
+            "ENABLE_HFP",
+            "ENABLE_HFP_CVC",
+            "ENABLE_HFP_NREC",
+            "ENABLE_HFP_WBS",
+            "ENABLE_LED",
+            "ENABLE_MAP",
+            "ENABLE_PBAP",
+            "ENABLE_SPP ",
+            "ENABLE_SPP_SNIFF",
+            "FLOW_CTRL",
+            "FORCE_ANALOG_MIC",
+            "GPIOCONTROL",
+            "I2S",
+            "INPUT_GAIN",
+            "LOCAL_ADDR",
+            "MAX_REC",
+            "MUSIC_META_DATA",
+            "NAME",
+            "NAME_SHORT",
+            "PARITY",
+            "PIN",
+            "REMOTE_ADDR",
+            "RSSI_THRESH",
+            "SPP_TRANSPARENT",
+            "UUID_DATA",
+            "UUID_SPP",
+            "UUID_SRV"
 
-    const char configNames[CFG_TOTAL][25] {
+        };
 
-        "AUDIO",
-        "AUTOCONN",
-        "BATT_THRESH",
-        "BAUD",
-        "BLE_ROLE",
-        "BPS",
-        "CLASSIC_ROLE",
-        "CMD_TO ",
-        "COD",
-        "CODEC",
-        "DEEP_SLEEP",
-        "DEVICE_ID",
-        "DISCOVERABLE",
-        "ENABLE_A2DP ",
-        "ENABLE_ANDROID_BLE",
-        "ENABLE_AVRCP",
-        "ENABLE_BATTERY_IND",
-        "ENABLE_HFP",
-        "ENABLE_HFP_CVC",
-        "ENABLE_HFP_NREC",
-        "ENABLE_HFP_WBS",
-        "ENABLE_LED",
-        "ENABLE_MAP",
-        "ENABLE_PBAP",
-        "ENABLE_SPP ",
-        "ENABLE_SPP_SNIFF",
-        "FLOW_CTRL",
-        "FORCE_ANALOG_MIC",
-        "GPIOCONTROL",
-        "I2S",
-        "INPUT_GAIN",
-        "LOCAL_ADDR",
-        "MAX_REC",
-        "MUSIC_META_DATA",
-        "NAME",
-        "NAME_SHORT",
-        "PARITY",
-        "PIN",
-        "REMOTE_ADDR",
-        "RSSI_THRESH",
-        "SPP_TRANSPARENT",
-        "UUID_DATA",
-        "UUID_SPP",
-        "UUID_SRV"
-
-    };
+    }
 
     const int RX_MESSAGE_MAX = 100;
-
+    
     const int BT_QUEUE_LENGTH       = 20;
     const int BT_QUEUE_DATA_LENGTH  = 50;
 
-    const int BT_RESET			= 0;
-    const int BT_INQUIRY		= 1;
-    const int BT_DISCOVERABLE	= 2;
-    const int BT_LIST			= 3;
-    const int BT_CONNECT		= 4;
-    const int BT_STATUS			= 5;
-    const int BT_CONFIG 		= 6;
-    const int BT_FACTORY 		= 7;
-    const int BT_WRITE 			= 8;
-    const int BT_GET_PBOOK		= 9;
-    const int BT_NAME			= 10;
-    const int BT_SET_ROLE		= 11;
-    const int BT_PLAY_NOISE		= 12;
-    const int BT_AUDIO_TRANSFER = 13;
-    const int BT_CALL_NUMBER    = 14;
-    const int BT_SET_AUDIO      = 15;
-    const int BT_GET_MIC_STATE  = 16;
-    const int BT_SET_GAIN       = 17;
-    const int BT_GET_VOLUME     = 18;
-    const int BT_SET_VOLUME     = 19;
-    const int BT_END_CALL       = 20;
-    const int BT_REJECT_CALL    = 21;
-    const int BT_ANSWER_CALL    = 22;
-    const int BT_SET_POWER      = 23;
-    const int BT_GET_CONFIG     = 24;
-    const int BT_GET_BATTERY    = 25;
+    namespace BT {
 
-    const char btfunctions[30][20] = {
+        const int 
+        
+        RESET           =  0,
+        INQUIRY         =  1,
+        DISCOVERABLE    =  2,
+        LIST            =  3,
+        CONNECT         =  4,
+        STATUS          =  5,
+        CONFIG          =  6,
+        FACTORY         =  7,
+        WRITE           =  8,
+        GET_PBOOK       =  9,
+        NAME            = 10,
+        SET_ROLE        = 11,
+        PLAY_NOISE      = 12,
+        AUDIO_TRANSFER  = 13,
+        CALL_NUMBER     = 14,
+        SET_AUDIO       = 15,
+        GET_MIC_STATE   = 16,
+        SET_GAIN        = 17,
+        GET_VOLUME      = 18,
+        SET_VOLUME      = 19,
+        END_CALL        = 20,
+        REJECT_CALL     = 21,
+        ANSWER_CALL     = 22,
+        SET_POWER       = 23,
+        GET_CONFIG      = 24,
+        BATTERY         = 25;
 
-        "BT_RESET",
-        "BT_INQUIRY",
-        "BT_DISCOVERABLE",
-        "BT_LIST",
-        "BT_CONNECT",
-        "BT_STATUS",
-        "BT_CONFIG",
-        "BT_FACTORY",
-        "BT_WRITE",
-        "BT_GET_PBOOK",
-        "BT_NAME",
-        "BT_SET_ROLE",
-        "BT_PLAY_NOISE",
-        "BT_AUDIO_TRANSFER",
-        "BT_CALL_NUMBER",
-        "BT_SET_AUDIO",
-        "BT_GET_MIC_STATE",
-        "BT_SET_GAIN",
-        "BT_GET_VOLUME",
-        "BT_SET_VOLUME",
-        "BT_END_CALL",
-        "BT_REJECT_CALL",
-        "BT_ANSWER_CALL",
-        "BT_SET_POWER",
-        "BT_GET_CONFIG",
-        "BT_GET_BATTERY"
+        const char names[30][15] = {
+
+            "RESET",
+            "INQUIRY",
+            "DISCOVERABLE",
+            "LIST",
+            "CONNECT",
+            "STATUS",
+            "CONFIG",
+            "FACTORY",
+            "WRITE",
+            "GET_PBOOK",
+            "NAME",
+            "SET_ROLE",
+            "PLAY_NOISE",
+            "AUDIO_TRANSFER",
+            "CALL_NUMBER",
+            "SET_AUDIO",
+            "GET_MIC_STATE",
+            "SET_GAIN",
+            "GET_VOLUME",
+            "SET_VOLUME",
+            "END_CALL",
+            "REJECT_CALL",
+            "ANSWER_CALL",
+            "SET_POWER",
+            "GET_CONFIG",
+            "BATTERY"
+        
+        };
+
+    }
     
+    struct bt_event {
+
+        uint16_t id;
+        uint64_t mac;
+        bool error;
+        union {
+        
+            struct { // battery
+            
+                bool batCharging;
+                int batLevel;
+            
+            };
+            int volume;
+            struct {
+                
+                int configID;
+                union {
+                
+                    int baud;
+                
+                };
+              
+            };
+        
+        };
+
     };
-    
+
     class BC127 {
     
         // friend class BC127device;
@@ -211,14 +249,14 @@
          
             HardwareSerial * _serial;
         
-            BC127(HardwareSerial * ser);
-            
-            BC127(void (*btstartedFunction)(),
-                  void (*connectedFunction)(long long),
-                  void (*disconnectedFunction)(long long),
-                  void (*availibleFunction)(long long,int,char *));
+            BC127(HardwareSerial * ser,void (*tmpCallback)(bt_event)) {
 
-            int currentDeviceIndex = -1;
+                _serial = ser;
+                btCallback = tmpCallback;
+                
+            }
+
+            // int currentDeviceIndex = -1;
             int phoneState = PHONE_IDLE;
             char phoneNumber[15] {0};
             
@@ -241,8 +279,8 @@
             void connectPaired(int pairedIndex);
             void connectAvailible(int availibleIndex);
             void audioTransfer();
-            void getBaud() { addQueue(BT_GET_CONFIG,CFG_BAUD); }
-            void getBattery() { addQueue(BT_GET_BATTERY); }
+            void getBaud() { addQueue(BT::GET_CONFIG,CFG::BAUD); }
+            void getBattery() { addQueue(BT::BATTERY); }
             
 
             
@@ -254,6 +292,8 @@
 
         private:
         
+            void sendEvent(bt_event * event);
+
             int isConfig(char * inStr);
 
             void getConfig(int configValue);
@@ -290,10 +330,7 @@
             
             // Pointers to user functions 
             
-            void (*btStartFunction)();
-            void (*btConnectedFunction)(long long);
-            void (*btDisconnectedFunction)(long long);
-            void (*btAvailibleFunction)(long long,int,char *);
+            void (*btCallback)(bt_event);
             
             // Functions 
             
@@ -304,7 +341,7 @@
             
             void insertQueue(int function,byte *data,int length);
             void insertQueue(int function);
-            void insertQueue(int function,byte d);    		
+            void insertQueue(int function,byte d);            
             void insertQueue(int function,byte d0,byte d1);
             void insertQueue(int function,byte d0,byte d1,byte d2);
             
