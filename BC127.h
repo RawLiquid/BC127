@@ -797,6 +797,7 @@ void batteryMsg() {
     char outStr[40];
     char strC = 0;
     
+    // Pulling the data out of the battery status message
     for(int i=0;messageArray[i]!=0;i++) {
     
         switch(state) {
@@ -816,9 +817,9 @@ void batteryMsg() {
     out:
     outStr[strC] = 0;
     
-    bt_event event;
+    // bt_event event;
     
-    event.id = BT::BATTERY;
+    // event.id = BT::BATTERY;
     
     if(strMatch(outStr,"CHARGER ") == 0) {
 
@@ -869,7 +870,7 @@ void batteryMsg() {
     
         if(D) db.printf("ERROR: unrecognized battery message %s %d\r\n",outStr,strlen(outStr));
         
-        event.error = true;
+        // event.error = true;
     
     }
 
@@ -1697,130 +1698,48 @@ int strLength(const char* string) {
 }
 
 
-    
-    
-    
-    
-    
-    
-    
-        // void init();
-        // void loop();
-        // void power(bool state);
-        
-        // void reset();
-        // void status();
-        // void inquiry(byte length = 4);
-        // void discoverable(int onoff);
-        // void listPaired();
-        // void getAllConfig();
-        // void factoryReset();
-        // void getPbook();
-        // void setRole(int role,int mode = SINGLE);
-        // void connect(long long address);
-        // void connectPaired(int pairedIndex);
-        // void connectAvailible(int availibleIndex);
-        // void audioTransfer();
-        void getBaud() { addQueue(BT::GET_CONFIG,CFG::BAUD); }
-        void getBattery() { addQueue(BT::BATTERY); }
-        
+int getBatteryVoltage() {
 
-        
-        // void sayHello();
-        
-        // void callNumber(char * pNumber);
-        // void endCall();
-        // void answerCall();
+}
 
-    // private:
+/**
+ * Returns the battery percentage from 0 - 100
+ */
+int getBatteryLevel() {
+
+}
+
+/**
+ * \brief For getting the charging status of the battery
+ * \return charging status
+ */
+bool batteryCharging() {
+
+}
+
+/**
+ * \brief For getting the status of external power
+ * This function does not query the BC127 on it's own. 
+ * Polling of the battery status must be enabled using BC127::setBatteryPolling(bool state)
+ * \return external power state
+ */
+bool powerPluggedIn() {
+
+}
+/**
+ * \brief This turns on or off automatic battery polling
+ * \param state Values are 1 for ON and 0 for OFF
+ */
+void setBatteryPolling(bool state) {
+
+}
+
+void getBaud() { addQueue(BT::GET_CONFIG,CFG::BAUD); }
+void getBattery() { 
+
+    addQueue(BT::BATTERY); 
     
-        // void sendEvent(bt_event * event);
-
-        // int isConfig(char * inStr);
-
-        // void getConfig(int configValue);
-        // void setConfig(int configID,const char * dataStr);
-
-        // void configResult(int index,char * data);
-        
-        // Variables
-    
-        // const bool D = true;
-        
-        // int initTime = 0;
-        // bool bootDelayed = false;
-        
-        // bool powerState = ON;
-        
-        // int lastRingTime = 0;
-        
-        // int melVer = -1;
-
-        // bool started = false;
-        // char messageArray[RX_MESSAGE_MAX];
-        // int msgLen = 0;
-        
-        // byte dataQueue[BT_QUEUE_LENGTH][BT_QUEUE_DATA_LENGTH]; // For caching data for queued bluetooth operations
-        // int queueCount=0,queueWait=0,queuePtr=0,queueTotal=0;
-        // byte queue[BT_QUEUE_LENGTH];
-        
-        // int availibleTotal = 0;
-        // long long availibleAddress[BT_MAX_AVAILIBLE];
-        
-        // int pairedTotal = 0;
-        // long long pairedAddress[BT_MAX_PAIRED];
-        
-        // Pointers to user functions 
-        
-        // void (*btCallback)(bt_event);
-        
-        // Functions 
-        
-        // void run(int function);
-        
-        // void btSend(char * charArray);
-        // void btSend(byte * arrayToSend,uint16_t length);
-        
-        // void insertQueue(int function,byte *data,int length);
-        // void insertQueue(int function);
-        // void insertQueue(int function,byte d);            
-        // void insertQueue(int function,byte d0,byte d1);
-        // void insertQueue(int function,byte d0,byte d1,byte d2);
-        
-        // void addQueue(int function,byte *data,int length);
-        // void addQueue(int function);
-        // void addQueue(int function,byte d0);
-        // void addQueue(int function,byte d0,byte d1);
-        // void addQueue(int function,byte d0,byte d1,byte d2);
-        
-        // bool queueFinish(int function);
-        // byte curFunc();
-        
-        // bool stringtoint(char* string,int strt,int ending,int &returnValue);
-        // bool isDigit(char character);
-        
-        // int strMatch(char* mystring,const char* searchstring);
-        // int strLength(const char* string);
-        // long long stringToHexAuto(char *string,int strt);
-        // byte asciitohexnibble(char value);
-        // bool asciiIsHex(char value);
-        
-        
-        // void handleByte(int inputChar);
-        // void handleMessage();
-        
-        // void readyMsg();
-        // void linkOpened();
-        // void avrcpCommandMsg();
-        // void inquiryMsg();
-        // void nameMsg();
-        // void pairedDeviceMsg();
-        // void resultMsg(bool error);
-        // void melodyVersionMsg();            
-        // void ringMsg(); 
-        // void callMsg(); 
-        // void batteryMsg();
-
+}
 
 };
     
