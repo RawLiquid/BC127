@@ -11,8 +11,6 @@
 
 #define db Serial
 
-#define DEBUG DEBUG
-
 #define ON                  1
 #define OFF                 0
 
@@ -366,9 +364,9 @@ void handleByte(int inputChar) {
     // Throw out empty port readings
     if(inputChar != -1) {
     
-        // Debug
+        // db
         
-#ifdef DEBUG
+#ifdef db
         // Serial.write(inputChar);
 #endif
         
@@ -403,7 +401,7 @@ void handleByte(int inputChar) {
 
 void handleMessage() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.printf("btMsg %d \"%s\"\r\n",msgLen,messageArray);
 #endif
 
@@ -543,7 +541,7 @@ void recvMsg() {
 
 void readyMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("Recieved Ready Message");
 #endif
 
@@ -575,7 +573,7 @@ void readyMsg() {
 
 void linkOpened() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("linkOpened");
 #endif
 
@@ -588,7 +586,7 @@ void linkOpened() {
 //     
 //         stringtoint(messageArray,7,endpos - 1,currentDeviceIndex);
 //         
-// #ifdef DEBUG
+// #ifdef db
 //         Serial.printf("currentDeviceIndex %d\r\n",currentDeviceIndex);
 // #endif
 
@@ -618,7 +616,7 @@ void linkOpened() {
 
 void avrcpCommandMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("avrcpCommandMsg");
 #endif
 
@@ -635,13 +633,13 @@ void avrcpCommandMsg() {
 
 void inquiryMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("inquiryMsg");
 #endif
 
     long long temp = stringToHexAuto(messageArray,8);
 
-#ifdef DEBUG
+#ifdef db
     Serial.printf("inquiry address %012llX\r\n",temp);
 #endif        
     
@@ -657,7 +655,7 @@ void inquiryMsg() {
 
 void nameMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("nameMsg");
 #endif
 
@@ -693,14 +691,14 @@ void nameMsg() {
 
 void pairedDeviceMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("pairedDeviceMsg");
 #endif
 
 
     pairedAddress[pairedTotal] = stringToHexAuto(messageArray,5);    
 
-#ifdef DEBUG
+#ifdef db
     Serial.printf("pairedAddress[pairedTotal] %llX\r\n",pairedAddress[pairedTotal]);
 #endif        
 
@@ -710,7 +708,7 @@ void pairedDeviceMsg() {
 
 void resultMsg(bool error) {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("resultMsg");
 #endif
 
@@ -738,7 +736,7 @@ void resultMsg(bool error) {
 
 void melodyVersionMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("melodyVersionMsg");
 #endif
 
@@ -750,7 +748,7 @@ void melodyVersionMsg() {
 
 void ringMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("ringMsg");
 #endif
     
@@ -762,7 +760,7 @@ void ringMsg() {
 
 void callMsg() {
 
-#ifdef DEBUG
+#ifdef db
     Serial.println("callMsg");
 #endif
     
@@ -785,7 +783,7 @@ void callMsg() {
     
     } 
     
-#ifdef DEBUG
+#ifdef db
     Serial.printf("new number is %s\r\n",phoneNumber);
 #endif
     
@@ -1054,7 +1052,7 @@ void loop() {
 
             int function = queue[curFunc()];
             
-            // #ifdef DEBUG
+            // #ifdef db
             //     
             //     Serial.printf("btQueueCheck function %s %d\r\n",BT::names[function],function);
             // 
@@ -1073,7 +1071,7 @@ void loop() {
             
             timer = 0;
             
-            #ifdef DEBUG        
+            #ifdef db        
                 
                 Serial.printf("Running %s again %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
                 // Serial.printf("Timed out waiting for %s %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
@@ -1095,7 +1093,7 @@ void loop() {
         
             phoneState = PHONE_IDLE;
             
-            #ifdef DEBUG        
+            #ifdef db        
                 Serial.println("Ringing timed out");
             #endif        
             
@@ -1222,7 +1220,7 @@ void btSend(char * charArray) {
 
 void btSend(byte * arrayToSend,uint16_t length) {
 
-    #ifdef DEBUG
+    #ifdef db
         
         Serial.print("btSend ");
         
@@ -1240,7 +1238,7 @@ void btSend(byte * arrayToSend,uint16_t length) {
 
 void run(int function) {
 
-#ifdef DEBUG  
+#ifdef db  
     Serial.printf("run function %s %d\r\n",BT::names[function],function);
 #endif
 
@@ -1340,7 +1338,7 @@ void getConfig(int configValue) {
 
 void configResult(int index,char * dataStr) {
 
-    #ifdef DEBUG
+    #ifdef db
     
         Serial.printf("configResult %s recieved with data %s\r\n",CFG::names[index],dataStr);
     
@@ -1450,7 +1448,7 @@ void setConfig(int configID,const char * dataStr) {
 // Adding to the bluetooth queue
 
 void insertQueue(int function,byte *data,int length){
-#ifdef DEBUG  
+#ifdef db  
     Serial.printf("insertQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif
     if(queueCount==0 || (queueCount==1 && queueWait)) { addQueue(function,data,length); return; }
@@ -1518,7 +1516,7 @@ void insertQueue(int function,byte d0,byte d1) { byte dA[2]; dA[0]=d0; dA[1]=d1;
 void insertQueue(int function,byte d0,byte d1,byte d2) { byte dA[3]; dA[0]=d0; dA[1]=d1; dA[2]=d2;          insertQueue(function,dA,3); }
 
 void addQueue(int function,byte *data,int length){
-#ifdef DEBUG  
+#ifdef db  
     Serial.printf("addQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif  
     queueCount++;
@@ -1555,7 +1553,7 @@ void addQueue(int function,byte d0,byte d1,byte d2) { byte dA[3]; dA[0]=d0; dA[1
 // Removing from the bluetooth queue
 
 bool queueFinish(int function) {
-#ifdef DEBUG
+#ifdef db
     Serial.printf("queueFinish %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif
     //int nextInQueueIndex; nextInQueueIndex=queuePtr-btQueueCount; if(nextInQueueIndex<0)nextInQueueIndex+=10;
@@ -1569,7 +1567,7 @@ bool queueFinish(int function) {
         return true;
 
     } else {
-#ifdef DEBUG
+#ifdef db
         Serial.printf("btQueue Error function %d %s queue[curFunc()] %d %s queueCount %d",function,BT::names[function],queue[curFunc()],BT::names[queue[curFunc()]],queueCount);
 #endif
         return false;
