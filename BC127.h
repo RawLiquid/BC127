@@ -297,7 +297,7 @@ BC127(HardwareSerial * ser,void (*tmpCallback)(bt_event)) {
 int phoneState = PHONE_IDLE;
 char phoneNumber[15] {0};
 
-struct {
+struct { // battery
 
     int lvl;
     bool charging;
@@ -305,6 +305,8 @@ struct {
     uint16_t voltage;
 
 } battery;
+
+bool bat_response_wait = false;
 
 const bool D = true;
 
@@ -429,7 +431,8 @@ void handleMessage() {
         phoneState = PHONE_IDLE;
     
     } else if(strMatch(messageArray,"CALL")==0)           callMsg();
-    else if(strMatch(messageArray,"BATTERY_STATUS")==0) batteryMsg();
+    else if(strMatch(messageArray,"BATTERY_STATUS ")==0) batteryMsg();
+    else if(strMatch(messageArray,"CHARGER ")==0) chargerMsg(messageArray + 8,true);
     else {
     
         int cfg = isConfig(messageArray);
@@ -730,7 +733,7 @@ void resultMsg(bool error) {
             
     }
 
-    queueFinish(queue[curFunc()]);
+    queueFinish(queue[curFunc()],error);
 
 }
 
@@ -820,30 +823,9 @@ void batteryMsg() {
     // event.id = BT::BATTERY;
     
     if(strMatch(outStr,"CHARGER ") == 0) {
-
-        if(strMatch(outStr,"CONNECTED") == 8 || 
-        strMatch(outStr,"IN_PROGRESS") == 8) {
-
-            battery.charging = true;
-            battery.plugged_in = true;
-            
-            // event.bat.charging = true;
-            // event.bat.full = false;
-
-            // if(D) Serial.println("BC127 says that the battery is charging");
-            
-        } else if(strMatch(outStr,"COMPLETE") == 8) {
         
-            battery.charging = false;
-            battery.plugged_in = true;
-            
-            // event.bat.charging = false;
-            // event.bat.full = true;
+        chargerMsg(outStr + 8,false);
 
-            // if(D) Serial.println("BC127 says that the battery is charged");
-        
-        }
-    
     } else if(strMatch(outStr,"VOLTAGE ") == 0) {
         
         int dataStrLen = strC - 8;
@@ -873,6 +855,39 @@ void batteryMsg() {
     }
 
     // sendEvent(&event);
+
+}
+
+void chargerMsg(char * str,bool standaloneMsg) {
+
+    if(strMatch(str,"CONNECTED") == 0 || 
+    strMatch(str,"IN_PROGRESS") == 0) {
+
+        battery.charging = true;
+        battery.plugged_in = true;
+        
+    } else if(strMatch(str,"DISCONNECTED") == 0) {
+    
+        battery.charging = false;
+        battery.plugged_in = false;
+        
+    } else if(strMatch(str,"COMPLETE") == 0) {
+    
+        battery.charging = false;
+        battery.plugged_in = true;
+        
+    }
+    
+    if(standaloneMsg) {
+
+        bt_event event;
+
+        event.id = BT::BATTERY;
+        event.error = false;
+
+        sendEvent(&event);
+
+    }
 
 }
 
@@ -1044,6 +1059,19 @@ void loop() {
         if(millis() - initTime > 1000) bootDelayed = true;
     
     } else {
+    
+        static elapsedMillis batteryQueryTime;
+        
+        // Query the battery every 5 seconds
+        if(!bat_response_wait && batteryQueryTime > 5000) {
+            
+            batteryQueryTime = 0;
+            
+            bat_response_wait = true;
+            
+            addQueue(BT::BATTERY);
+        
+        }
 
         // For detecting a bluetooth message timeout
         static elapsedMillis timer;
@@ -1086,7 +1114,8 @@ void loop() {
         
         }
         
-        // TODO: somewhere around melody v5.6 fixed this, implement the new message
+        // TODO: somewhere around melody v5.6 fixed this, implement the new message.
+        
         // Looks like the BC127 doesn't tell me if the ringing just stops
         // So we time out when it stops giving us ring numbers, go back to phone idle
         if(phoneState == PHONE_RINGING && millis() - lastRingTime > 4000) {
@@ -1552,12 +1581,14 @@ void addQueue(int function,byte d0,byte d1,byte d2) { byte dA[3]; dA[0]=d0; dA[1
 
 // Removing from the bluetooth queue
 
-bool queueFinish(int function) {
+bool queueFinish(int function,bool error = false) {
 #ifdef db
     Serial.printf("queueFinish %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif
     //int nextInQueueIndex; nextInQueueIndex=queuePtr-btQueueCount; if(nextInQueueIndex<0)nextInQueueIndex+=10;
 
+    queueDone(function,error);
+    
     if(queueCount>0 && function==queue[curFunc()]) {
 
         queue[curFunc()]=0;
@@ -1575,6 +1606,38 @@ bool queueFinish(int function) {
     }
 
     return false;
+
+}
+
+
+/**
+ * \brief Handles a finished queue item.
+ * This is called whenever a item in the queue is finished
+ * \param function The function that is about to be removed from the queue
+ * \param error Error flag, true for an error false for no error
+ */
+void queueDone(int function,bool error) {
+    
+    bt_event event;
+    
+    event.id = function;
+    event.error = error;
+
+    switch(function) {
+    
+        case BT::BATTERY:
+        
+            // Let the loop know it's okay to request battery status again now
+            bat_response_wait = false;
+            
+            // Send a battery event
+            // TODO: check if anything has actually changed before we send this event
+            sendEvent(&event);
+
+            break;
+    
+    
+    }
 
 }
 
@@ -1696,14 +1759,21 @@ int strLength(const char* string) {
 }
 
 
+/**
+ * \return Battery voltage in millivolts
+ */
 int getBatteryVoltage() {
+
+    return battery.voltage;
 
 }
 
 /**
- * Returns the battery percentage from 0 - 100
+ * \return The battery percentage from 0 - 100
  */
 int getBatteryLevel() {
+
+    return battery.voltage;
 
 }
 
@@ -1712,6 +1782,8 @@ int getBatteryLevel() {
  * \return charging status
  */
 bool batteryCharging() {
+
+    return battery.charging;
 
 }
 
@@ -1723,7 +1795,10 @@ bool batteryCharging() {
  */
 bool powerPluggedIn() {
 
+    return battery.plugged_in;
+
 }
+
 /**
  * \brief This turns on or off automatic battery polling
  * \param state Values are 1 for ON and 0 for OFF
@@ -1732,12 +1807,17 @@ void setBatteryPolling(bool state) {
 
 }
 
-void getBaud() { addQueue(BT::GET_CONFIG,CFG::BAUD); }
-void getBattery() { 
+void getBaud() { 
 
-    addQueue(BT::BATTERY); 
+    addQueue(BT::GET_CONFIG,CFG::BAUD); 
     
 }
+
+// void getBattery() { 
+// 
+//     addQueue(BT::BATTERY); 
+//     
+// }
 
 };
     
