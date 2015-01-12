@@ -302,7 +302,7 @@ struct { // battery
     int lvl;
     bool charging;
     bool plugged_in;
-    uint16_t voltage;
+    int voltage;
 
 } battery;
 
@@ -351,6 +351,8 @@ void init() {
     
     initTime = millis();
     bootDelayed = false;
+    
+    battery.voltage = -1;
     
 
 }
