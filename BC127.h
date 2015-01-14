@@ -9,7 +9,7 @@
 #include <SdFat.h>
 #include <Stream.h>
 
-#define db Serial
+// #define db Serial
 
 #define ON                  1
 #define OFF                 0
@@ -357,12 +357,6 @@ void init() {
 
 }
 
-void sayHello() {
-
-    Serial.println("The BC127 library says hello!");
-
-}
-
 void handleByte(int inputChar) {
 
     // Throw out empty port readings
@@ -371,7 +365,7 @@ void handleByte(int inputChar) {
         // db
         
 #ifdef db
-        // Serial.write(inputChar);
+        // db.write(inputChar);
 #endif
         
         // Check for end of line bytes
@@ -406,7 +400,7 @@ void handleByte(int inputChar) {
 void handleMessage() {
 
 #ifdef db
-    Serial.printf("btMsg %d \"%s\"\r\n",msgLen,messageArray);
+    db.printf("btMsg %d \"%s\"\r\n",msgLen,messageArray);
 #endif
 
     if(     strMatch(messageArray,"RECV")==0)           recvMsg();
@@ -547,7 +541,7 @@ void recvMsg() {
 void readyMsg() {
 
 #ifdef db
-    Serial.println("Recieved Ready Message");
+    db.println("Recieved Ready Message");
 #endif
 
     queueCount  = 0;
@@ -579,7 +573,7 @@ void readyMsg() {
 void linkOpened() {
 
 #ifdef db
-    Serial.println("linkOpened");
+    db.println("linkOpened");
 #endif
 
     if(strMatch(messageArray,"OK")==5) {
@@ -592,7 +586,7 @@ void linkOpened() {
 //         stringtoint(messageArray,7,endpos - 1,currentDeviceIndex);
 //         
 // #ifdef db
-//         Serial.printf("currentDeviceIndex %d\r\n",currentDeviceIndex);
+//         db.printf("currentDeviceIndex %d\r\n",currentDeviceIndex);
 // #endif
 
         // print currentDeviceIndex here
@@ -622,7 +616,7 @@ void linkOpened() {
 void avrcpCommandMsg() {
 
 #ifdef db
-    Serial.println("avrcpCommandMsg");
+    db.println("avrcpCommandMsg");
 #endif
 
     if(strMatch(messageArray,"PLAY")==6) {
@@ -639,13 +633,13 @@ void avrcpCommandMsg() {
 void inquiryMsg() {
 
 #ifdef db
-    Serial.println("inquiryMsg");
+    db.println("inquiryMsg");
 #endif
 
     long long temp = stringToHexAuto(messageArray,8);
 
 #ifdef db
-    Serial.printf("inquiry address %012llX\r\n",temp);
+    db.printf("inquiry address %012llX\r\n",temp);
 #endif        
     
     // Make sure this address isn't already in the list
@@ -661,7 +655,7 @@ void inquiryMsg() {
 void nameMsg() {
 
 #ifdef db
-    Serial.println("nameMsg");
+    db.println("nameMsg");
 #endif
 
     // Get address out of the string
@@ -697,14 +691,14 @@ void nameMsg() {
 void pairedDeviceMsg() {
 
 #ifdef db
-    Serial.println("pairedDeviceMsg");
+    db.println("pairedDeviceMsg");
 #endif
 
 
     pairedAddress[pairedTotal] = stringToHexAuto(messageArray,5);    
 
 #ifdef db
-    Serial.printf("pairedAddress[pairedTotal] %llX\r\n",pairedAddress[pairedTotal]);
+    db.printf("pairedAddress[pairedTotal] %llX\r\n",pairedAddress[pairedTotal]);
 #endif        
 
     pairedTotal++;
@@ -714,10 +708,10 @@ void pairedDeviceMsg() {
 void resultMsg(bool error) {
 
 #ifdef db
-    Serial.println("resultMsg");
+    db.println("resultMsg");
 #endif
 
-    // Serial.printf("Got result msg function %s %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
+    // db.printf("Got result msg function %s %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
 
     switch(queue[curFunc()]) {
     
@@ -742,7 +736,7 @@ void resultMsg(bool error) {
 void melodyVersionMsg() {
 
 #ifdef db
-    Serial.println("melodyVersionMsg");
+    db.println("melodyVersionMsg");
 #endif
 
     if(strMatch(messageArray,"V5.0")==13)           melVer = MELODY_5_0; 
@@ -754,7 +748,7 @@ void melodyVersionMsg() {
 void ringMsg() {
 
 #ifdef db
-    Serial.println("ringMsg");
+    db.println("ringMsg");
 #endif
     
     phoneState = PHONE_RINGING;
@@ -766,7 +760,7 @@ void ringMsg() {
 void callMsg() {
 
 #ifdef db
-    Serial.println("callMsg");
+    db.println("callMsg");
 #endif
     
     phoneState = PHONE_RINGING;
@@ -789,7 +783,7 @@ void callMsg() {
     } 
     
 #ifdef db
-    Serial.printf("new number is %s\r\n",phoneNumber);
+    db.printf("new number is %s\r\n",phoneNumber);
 #endif
     
 }
@@ -850,7 +844,11 @@ void batteryMsg() {
     
     } else {
     
-        if(D) db.printf("ERROR: unrecognized battery message %s %d\r\n",outStr,strlen(outStr));
+        #ifdef db
+
+            db.printf("ERROR: unrecognized battery message %s %d\r\n",outStr,strlen(outStr));
+        
+        #endif
         
         // event.error = true;
     
@@ -996,7 +994,7 @@ long long stringToHexAuto(char *string,int strt) {
     long long tmp;
     int valueC=0;
     
-    // Serial.printf("strLength %d\r\n",strLength);
+    // db.printf("strLength %d\r\n",strLength);
     
     for(int count=(strLength-1);count>=0;count--) {
 
@@ -1004,7 +1002,7 @@ long long stringToHexAuto(char *string,int strt) {
         
         tmp <<= (4 * valueC);
     
-        // Serial.printf("value %12llX %2d %2d tmp %12llX\r\n",value,count,strt,tmp);
+        // db.printf("value %12llX %2d %2d tmp %12llX\r\n",value,count,strt,tmp);
         
         value += tmp;
         // value += tmp << (4 * valueC);
@@ -1084,7 +1082,7 @@ void loop() {
             
             // #ifdef db
             //     
-            //     Serial.printf("btQueueCheck function %s %d\r\n",BT::names[function],function);
+            //     db.printf("btQueueCheck function %s %d\r\n",BT::names[function],function);
             // 
             // #endif
 
@@ -1103,8 +1101,8 @@ void loop() {
             
             #ifdef db        
                 
-                Serial.printf("Running %s again %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
-                // Serial.printf("Timed out waiting for %s %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
+                db.printf("Running %s again %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
+                // db.printf("Timed out waiting for %s %d\r\n",BT::names[queue[curFunc()]],queue[curFunc()]);
                 
             #endif        
 
@@ -1125,7 +1123,7 @@ void loop() {
             phoneState = PHONE_IDLE;
             
             #ifdef db        
-                Serial.println("Ringing timed out");
+                db.println("Ringing timed out");
             #endif        
             
         }
@@ -1253,13 +1251,13 @@ void btSend(byte * arrayToSend,uint16_t length) {
 
     #ifdef db
         
-        Serial.print("btSend ");
+        db.print("btSend ");
         
-        for(int i=0;i<length;i++) if(arrayToSend[i] != '\r') Serial.write(arrayToSend[i]); 
-        Serial.println();
+        for(int i=0;i<length;i++) if(arrayToSend[i] != '\r') db.write(arrayToSend[i]); 
+        db.println();
         
-        // for(int i=0;i<length;i++) Serial.printf("%02X ",arrayToSend[i]); 
-        // Serial.println();
+        // for(int i=0;i<length;i++) db.printf("%02X ",arrayToSend[i]); 
+        // db.println();
     
     #endif
 
@@ -1270,7 +1268,7 @@ void btSend(byte * arrayToSend,uint16_t length) {
 void run(int function) {
 
 #ifdef db  
-    Serial.printf("run function %s %d\r\n",BT::names[function],function);
+    db.printf("run function %s %d\r\n",BT::names[function],function);
 #endif
 
     #define sttm snprintf(str,TSTR_MAX,
@@ -1371,7 +1369,7 @@ void configResult(int index,char * dataStr) {
 
     #ifdef db
     
-        Serial.printf("configResult %s recieved with data %s\r\n",CFG::names[index],dataStr);
+        db.printf("configResult %s recieved with data %s\r\n",CFG::names[index],dataStr);
     
     #endif
     
@@ -1480,7 +1478,7 @@ void setConfig(int configID,const char * dataStr) {
 
 void insertQueue(int function,byte *data,int length){
 #ifdef db  
-    Serial.printf("insertQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
+    db.printf("insertQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif
     if(queueCount==0 || (queueCount==1 && queueWait)) { addQueue(function,data,length); return; }
 
@@ -1548,7 +1546,7 @@ void insertQueue(int function,byte d0,byte d1,byte d2) { byte dA[3]; dA[0]=d0; d
 
 void addQueue(int function,byte *data,int length){
 #ifdef db  
-    Serial.printf("addQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
+    db.printf("addQueue %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif  
     queueCount++;
 
@@ -1585,7 +1583,7 @@ void addQueue(int function,byte d0,byte d1,byte d2) { byte dA[3]; dA[0]=d0; dA[1
 
 bool queueFinish(int function,bool error = false) {
 #ifdef db
-    Serial.printf("queueFinish %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
+    db.printf("queueFinish %s queueCount %d queuePtr %d queueWait %d function %d\r\n",BT::names[function],queueCount,queuePtr,queueWait,function);
 #endif
     //int nextInQueueIndex; nextInQueueIndex=queuePtr-btQueueCount; if(nextInQueueIndex<0)nextInQueueIndex+=10;
 
@@ -1601,7 +1599,7 @@ bool queueFinish(int function,bool error = false) {
 
     } else {
 #ifdef db
-        Serial.printf("btQueue Error function %d %s queue[curFunc()] %d %s queueCount %d",function,BT::names[function],queue[curFunc()],BT::names[queue[curFunc()]],queueCount);
+        db.printf("btQueue Error function %d %s queue[curFunc()] %d %s queueCount %d",function,BT::names[function],queue[curFunc()],BT::names[queue[curFunc()]],queueCount);
 #endif
         return false;
 
